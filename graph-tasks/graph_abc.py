@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple
+import copy
 
 
 class Graph(ABC):
@@ -66,7 +67,11 @@ class Graph(ABC):
         TODO:
             - Implement deep copy construction and sorting of neighbors by vertex id.
         """
-        raise NotImplementedError("Adjacency list: implement me")
+        adj_list = copy.deepcopy(self._adjacency_list)
+        for vertice in adj_list.keys():
+            adj_list[vertice].sort()
+
+        return adj_list
 
 
     def get_adjacency_matrix(self) -> List[List[float]]:

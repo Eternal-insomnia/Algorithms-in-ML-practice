@@ -1,6 +1,6 @@
 from typing import List, Dict
 from graph_abc import Graph
-
+from queue import Queue
 
 class GraphAlgorithms:
     """
@@ -41,7 +41,36 @@ class GraphAlgorithms:
             - Mark vertices as visited at the time of enqueueing,
               not when dequeued — this avoids duplicates.
         """
-        raise NotImplementedError("BFS: implement me")
+
+        if start < 0 or start >= graph.vertices:
+            raise IndexError("Wrong start vertcie index")
+        visited = []
+        adj = graph.get_adjacency_list()
+        queue = Queue()
+        queue.put(start)
+        while not queue.empty():
+            curr_vertice = queue.get()
+            if curr_vertice in visited:
+                continue
+            for edge in adj[curr_vertice]:
+                if edge[0] not in visited:
+                    queue.put(edge[0])
+                else:
+                    continue
+            visited.append(curr_vertice)
+
+        return visited
+
+    @staticmethod
+    def _go_deeper(adj, stack, visited):
+        if stack[-1] in visited:
+            del stack[-1]
+            return
+        else:
+            visited.append(stack[-1])
+            for edge in adj[stack[-1]]:
+                stack.append(edge[0])
+                GraphAlgorithms._go_deeper(adj, stack, visited)
 
     @staticmethod
     def dfs(graph: Graph, start: int) -> List[int]:
@@ -70,7 +99,17 @@ class GraphAlgorithms:
             - In the iterative version, the order of adding neighbors to the stack
               affects determinism.
         """
-        raise NotImplementedError("DFS: implement me")
+
+        if start < 0 or start >= graph.vertices:
+            raise IndexError("Wrong start vertcie index")
+        visited = []
+        adj = graph.get_adjacency_list()
+        stack = []
+        stack.append(start)
+        while len(stack) > 0:
+            GraphAlgorithms._go_deeper(adj, stack, visited)
+
+        return visited
 
     @staticmethod
     def connected_components(graph: Graph) -> List[List[int]]:
