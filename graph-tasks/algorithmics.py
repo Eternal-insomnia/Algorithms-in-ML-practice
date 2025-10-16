@@ -1,5 +1,6 @@
 from typing import List, Dict
 from graph_abc import Graph
+from graph_factory import GraphFactory
 from queue import Queue
 
 class GraphAlgorithms:
@@ -142,7 +143,31 @@ class GraphAlgorithms:
             - For directed graphs, build a temporary dict[int, List[int]]
               with symmetric edges, then perform BFS/DFS over it.
         """
-        raise NotImplementedError("Connected components: implement me")
+        components = []
+        visited = set()
+        adj = graph.get_adjacency_list()
+        adj_matrix = [[0.0 for _ in range(graph.vertices)] for _ in range(graph.vertices)]
+
+        # fill adj_matrix and adj (if graph is directed)
+        for vertice, edges in adj.items():
+            for edge in edges:
+                if graph.directed:
+                    adj[edge[0]].append((vertice, edge[1]))
+                adj_matrix[vertice][edge[0]] = 1.0
+                adj_matrix[edge[0]][vertice] = 1.0
+
+        # create temporary undirected unweighted graph
+        graph_tmp = GraphFactory.from_adjacency_matrix(adj_matrix)
+
+        # find components
+        for i in range(graph_tmp.vertices):
+            if i not in visited:
+                components.append(GraphAlgorithms.bfs(graph_tmp, i))
+                components[-1].sort()
+                visited.update(components[-1])
+        components.sort()
+
+        return components
 
     @staticmethod
     def components_with_stats(graph: Graph) -> List[Dict[str, object]]:
@@ -185,4 +210,29 @@ class GraphAlgorithms:
             - For undirected graphs, use u < v (or a set of pairs) to avoid
               double-counting edges.
         """
-        raise NotImplementedError("Components with stats: implement me")
+        components_stats = []
+        components = GraphAlgorithms.connected_components(graph)
+        adj = graph.get_adjacency_list()
+        # get stats from every component in graph
+        for component in components:
+            stats = {}
+            stats["vertices"] = component
+            stats["node_count"] = len(component)
+            
+            # edge counting
+            edge_count = 0
+            for vertice, edges in adj.items():
+                for edge in edges:
+                    if graph.directed:
+                        edge_count += 1
+                    else:
+                        if (vertice < edge[0]):
+                            continue
+                        else:
+                            edge_count += 1
+            stats["edge_count"] = edge_count
+
+            stats["smallest_vertex"] = component[0]
+            components_stats.append(stats)
+
+        return components_stats
