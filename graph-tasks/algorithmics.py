@@ -53,9 +53,9 @@ class GraphAlgorithms:
             curr_vertice = queue.get()
             if curr_vertice in visited:
                 continue
-            for edge in adj[curr_vertice]:
-                if edge[0] not in visited:
-                    queue.put(edge[0])
+            for vertice, _ in adj[curr_vertice]:
+                if vertice not in visited:
+                    queue.put(vertice)
                 else:
                     continue
             visited.append(curr_vertice)
@@ -69,8 +69,8 @@ class GraphAlgorithms:
             return
         else:
             visited.append(stack[-1])
-            for edge in adj[stack[-1]]:
-                stack.append(edge[0])
+            for vertice, _ in adj[stack[-1]]:
+                stack.append(vertice)
                 GraphAlgorithms._go_deeper(adj, stack, visited)
 
     @staticmethod
@@ -149,12 +149,12 @@ class GraphAlgorithms:
         adj_matrix = [[0.0 for _ in range(graph.vertices)] for _ in range(graph.vertices)]
 
         # fill adj_matrix and adj (if graph is directed)
-        for vertice, edges in adj.items():
-            for edge in edges:
+        for vertice1, edges in adj.items():
+            for vertice2, weight in edges:
                 if graph.directed:
-                    adj[edge[0]].append((vertice, edge[1]))
-                adj_matrix[vertice][edge[0]] = 1.0
-                adj_matrix[edge[0]][vertice] = 1.0
+                    adj[vertice2].append((vertice1, weight))
+                adj_matrix[vertice1][vertice2] = 1.0
+                adj_matrix[vertice2][vertice1] = 1.0
 
         # create temporary undirected unweighted graph
         graph_tmp = GraphFactory.from_adjacency_matrix(adj_matrix)
@@ -221,12 +221,12 @@ class GraphAlgorithms:
             
             # edge counting
             edge_count = 0
-            for vertice, edges in adj.items():
-                for edge in edges:
+            for vertice1, edges in adj.items():
+                for vertice2, _ in edges:
                     if graph.directed:
                         edge_count += 1
                     else:
-                        if (vertice < edge[0]):
+                        if (vertice1 < vertice2):
                             continue
                         else:
                             edge_count += 1
